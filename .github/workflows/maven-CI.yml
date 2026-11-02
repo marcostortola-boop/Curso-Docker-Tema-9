@@ -31,5 +31,3 @@ jobs:
         with:
           name: mvn-hello-world-${{ steps.getVersion.outputs.version }}
           path: staging
-
-
