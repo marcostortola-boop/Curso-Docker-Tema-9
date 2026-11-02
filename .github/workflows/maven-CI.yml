@@ -8,26 +8,31 @@ jobs:
   test_and_build:
     runs-on: ubuntu-latest
     steps:
-      - name: Hacemos Checkuot del repo de Git
-        uses: actions/checkout@v2
+      - name: Hacemos Checkout del repo de Git
+        uses: actions/checkout@v4
 
       - name: Set up JDK 8
-        uses: actions/setup-java@v1
+        uses: actions/setup-java@v4
         with:
-          java-version: 8
+          java-version: '8'
+          distribution: 'temurin'
 
-      - name: Test project with Maven
-        run: mvn -B test
+      - name: Build and Test project with Maven
+        run: mvn -B clean package
 
       - name: Get Version from POM.xml
-        uses: entimaniac/read-pom-version-action@1.0.0
         id: getVersion
+        run: |
+          VERSION=$(mvn help:evaluate -Dexpression=project.version -q -DforceStdout)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - name: Copy generated .war to staging
-        run: mkdir staging && cp target/*.war staging
+        run: |
+          mkdir -p staging
+          cp target/*.war staging/
 
       - name: Upload generated .war to Artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: mvn-hello-world-${{ steps.getVersion.outputs.version }}
-          path: staging
+          path: staging/
